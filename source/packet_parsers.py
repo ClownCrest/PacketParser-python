@@ -27,3 +27,11 @@ def parse_arp_header(hex_data):
 
     print(f"ARP Header:")
     print(f"  {'Hardware Type:':<25} {hex_data[:4]:<20} | {hardware_type}")
+    print(f"  {'Protocol Type:':<25}")
+    print(f"  {'Hardware Size:':<25}")
+    print(f"  {'Protocol Size:':<25}")
+    print(f"  {'Operation:':<25}")
+    print(f"  {'Sender MAC:':<25}")
+    print(f"  {'Sender IP:':<25}")
+    print(f"  {'Target MAC:':<25}")
+    print(f"  {'Target IP:':<25}")
