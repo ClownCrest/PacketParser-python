@@ -131,7 +131,7 @@ if __name__ == "__main__":
         "-i", "--interface", default="any", help="The interface to capture packets on (e.g., eth0, wlan0, any) (default: any)"
     )
     parser.add_argument(
-        "-f", "--filter", help="BPF filter to apply (e.g., 'tcp, udp, arp, icmp'). If not provided, captures all packets."
+        "-f", "--filter", help="BPF filter to apply (e.g., 'tcp, icmp, udp, arp, ip, ip6, icmp6, dns'). If not provided, captures all packets."
     )
     parser.add_argument(
         "-c", "--count", type=int, default=1, help="Number of packets to capture (default: 1)"
@@ -156,7 +156,7 @@ if __name__ == "__main__":
 
 
     if not args.filter:
-        user_input = input("No filter provided. Please provide a filter (tcp, icmp, arp, udp) or press Enter to capture all packets: ").strip().lower()
+        user_input = input("No filter provided. Please provide a filter (tcp, icmp, udp, arp, ip, ip6, icmp6, dns) or press Enter to capture all packets: ").strip().lower()
         if user_input in allowed_filters:  # <--- Check against allowed_filters
             args.filter = user_input
         elif user_input in ['', 'any', 'none']:
