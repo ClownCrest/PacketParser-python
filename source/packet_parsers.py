@@ -31,6 +31,10 @@ def parse_ethernet_header(hex_data):
         print(f"{'Parsing IPv4 Header'.center(width)}")
         print("-" * width)
         parse_ipv4_header(payload)
+    elif ether_type == "86dd":  # IPv6
+        print(f"{'Parsing IPv6 Header'.center(width)}")
+        print("-" * width)
+        parse_ipv6_header(payload)
     else:
         print(f"  {'Unknown EtherType:':<27} {ether_type:<20} | {int(ether_type, 16)}")
         print("  No parser available for this EtherType.")
@@ -129,9 +133,14 @@ def parse_udp_header(hex_data):
     print(f"  {'Destination Port':<27} {hex_data[4:8]:<20} | {destination_port}")
     print(f"  {'Length':<27} {hex_data[8:12]:<20} | {length}")
     print(f"  {'Checksum':<27} {hex_data[12:16]:<20} | {checksum}")
-    print(f"{'-' * ((width - len('UDP Payload')) // 2)}UDP Payload{'-' * (90 - len('UDP Payload') - ((width - len('UDP Payload')) // 2))}")
-    print(f"{wrapped_payload}")
-    print("=" * width)
+    if source_port == 53 or destination_port == 53:
+        print(f"\n{'Parsing DNS Header'.center(width)}")
+        print("-" * width)
+        parse_dns_header(payload)
+    else:
+        print(f"{'-' * ((width - len('UDP Payload')) // 2)}UDP Payload{'-' * (90 - len('UDP Payload') - ((width - len('UDP Payload')) // 2))}")
+        print(f"{wrapped_payload}")
+        print("=" * width)
 
 # Parse TCP header
 def parse_tcp_header(hex_data):
@@ -194,4 +203,76 @@ def parse_icmp_header(hex_data):
     print(f"  {'Checksum':<27} {hex_data[4:8]:<20} | {checksum}")
     print(f"{'-' * ((width - len('ICMP Payload')) // 2)}ICMP Payload{'-' * (90 - len('ICMP Payload') - ((width - len('ICMP Payload')) // 2))}")
     print(f"{wrapped_payload}")
+    print("=" * width)
+
+
+def parse_ipv6_header(hex_data):
+    # Parse header fields
+    version = int(hex_data[0], 16)
+    traffic_class = int(hex_data[1:3], 16)
+    flow_label = int(hex_data[3:8], 16)
+    payload_length = int(hex_data[8:12], 16)
+    next_header = int(hex_data[12:14], 16)
+    hop_limit = int(hex_data[14:16], 16)
+    source_hex = hex_data[16:48]
+    dest_hex = hex_data[48:80]
+    source_ip = ':'.join([source_hex[i:i+4] for i in range(0, len(source_hex), 4)])
+    dest_ip = ':'.join([dest_hex[i:i+4] for i in range(0, len(dest_hex), 4)])
+
+    print(f"IPv6 Header:")
+    print(f"  {'Version':<27} {hex_data[0]:<32} | {version}")
+    print(f"  {'Traffic Class':<27} {hex_data[1:3]:<32} | {traffic_class}")
+    print(f"  {'Flow Label':<27} {hex_data[3:8]:<32} | {flow_label}")
+    print(f"  {'Payload Length':<27} {hex_data[8:12]:<32} | {payload_length}")
+    print(f"  {'Next Header':<27} {hex_data[12:14]:<32} | {next_header}")
+    print(f"  {'Hop Limit':<27} {hex_data[14:16]:<32} | {hop_limit}")
+    print(f"  {'Source IP':<27} {hex_data[16:48]:<32} | {source_ip}")
+    print(f"  {'Destination IP':<27} {hex_data[48:80]:<32} | {dest_ip}")
+
+    # Handle upper layer protocols
+    payload = hex_data[80:]
+    if next_header == 6:  # TCP
+        parse_tcp_header(payload)
+    elif next_header == 17:  # UDP
+        parse_udp_header(payload)
+    elif next_header == 58:  # ICMPv6
+        parse_icmp_v6_header(payload)
+    else:
+        print(f"  {'Unknown Protocol:':<27} {hex(next_header)}")
+        print("  No parser available for this protocol.")
+
+# Parse ICMPv6 header
+def parse_icmp_v6_header(hex_data):
+    icmp_v6_type = int(hex_data[0:2], 16)
+    icmp_v6_code = int(hex_data[2:4], 16)
+    icmp_v6_checksum = int(hex_data[4:8], 16)
+    payload = hex_data[8:]
+    wrapped_payload = textwrap.fill(payload, width=width)
+
+    print(f"{'Parsing ICMPv6 Header'.center(width)}")
+    print("-" * width)
+    print(f"ICMPv6 Header:")
+    print(f"  {'Type':<27} {hex_data[0:2]:<32} | {icmp_v6_type}")
+    print(f"  {'Code':<27} {hex_data[2:4]:<32} | {icmp_v6_code}")
+    print(f"  {'Checksum':<27} {hex_data[4:8]:<32} | {icmp_v6_checksum}")
+    print(f"{'-' * ((width - len('ICMPv6 Payload')) // 2)}ICMPv6 Payload{'-' * (90 - len('ICMPv6 Payload') - ((width - len('ICMPv6 Payload')) // 2))}")
+    print(f"{wrapped_payload}")
+    print("=" * width)
+
+# Parse DNS header
+def parse_dns_header(hex_data):
+    dns_id = int(hex_data[0:4], 16)
+    dns_flags = int(hex_data[4:8], 16)
+    dns_question_count = int(hex_data[8:12], 16)
+    dns_answer_count = int(hex_data[12:16], 16)
+    dns_rr_count = int(hex_data[16:20], 16)
+    dns_additional_rr_count = int(hex_data[20:24], 16)
+
+    print(f"{'DNS Header:':<27}")
+    print(f"  {'Transaction ID:':<27} {hex_data[0:4]:<20} | {dns_id}")
+    print(f"  {'Flags:':<27} {hex_data[4:8]:<20} | 0b{dns_flags:016b}")
+    print(f"  {'Questions:':<27} {hex_data[8:12]:<20} | {dns_question_count}")
+    print(f"  {'Answer RRs:':<27} {hex_data[12:16]:<20} | {dns_answer_count}")
+    print(f"  {'Authority RRs:':<27} {hex_data[16:20]:<20} | {dns_rr_count}")
+    print(f"  {'Additional RRs:':<27} {hex_data[20:24]:<20} | {dns_additional_rr_count}")
     print("=" * width)

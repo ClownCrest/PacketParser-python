@@ -138,17 +138,22 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    allowed_filters = ["tcp", "icmp", "udp", "arp"]  # <--- Added allowed filters list
+    allowed_filters = ["tcp", "icmp", "udp", "arp", "ip", "ip6", "icmp6", "dns"]  # <--- Added allowed filters list
 
     if args.count < 0:
         print("Error: The packet count (-c) cannot be negative.")
         exit(1)
 
-    # Validate filter argument (new check added here)
     if args.filter:
-        if args.filter.strip().lower() not in allowed_filters:
+        filter_lower = args.filter.strip().lower()
+        if filter_lower not in allowed_filters:
             print(f"Error: Invalid filter '{args.filter}'. Allowed filters: {', '.join(allowed_filters)}.")
             exit(1)
+        if filter_lower == "dns":
+            args.filter = "udp port 53 or tcp port 53"
+        else:
+            args.filter = filter_lower
+
 
     if not args.filter:
         user_input = input("No filter provided. Please provide a filter (tcp, icmp, arp, udp) or press Enter to capture all packets: ").strip().lower()
