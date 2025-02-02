@@ -125,15 +125,31 @@ def capture_on_all_interfaces(capture_filter, packet_count):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Packet sniffer using Scapy with manual HEX parsing")
     parser.add_argument(
-        "-i", "--interface", required=True, help="The interface to capture packets on (e.g., eth0, wlan0, any)"
+        "-i", "--interface", default="any", help="The interface to capture packets on (e.g., eth0, wlan0, any) (default: any)"
     )
     parser.add_argument(
-        "-f", "--filter", help="BPF filter to apply (e.g., 'tcp and port 80'). If not provided, captures all packets."
+        "-f", "--filter", help="BPF filter to apply (e.g., 'tcp, udp, arp, icmp'). If not provided, captures all packets."
     )
     parser.add_argument(
-        "-c", "--count", type=int, required=True, help="Number of packets to capture (default: 1)"
+        "-c", "--count", type=int, default=1, help="Number of packets to capture (default: 1)"
     )
     args = parser.parse_args()
+
+    if args.count < 0:
+        print("Error: The packet count (-c) cannot be negative.")
+        exit(1)
+
+    if not args.filter:
+        user_input = input("No filter provided. Please provide a filter (tcp, icmp, arp, udp) or press Enter to capture all packets: ")
+        if user_input.lower() in ['tcp', 'icmp', 'arp', 'udp']:
+            args.filter = user_input
+        elif user_input == "":
+            print("Proceeding with capturing all packets.")
+        elif user_input.lower() in ['any', 'Any', 'None', 'none']:
+            print("Proceeding with capturing all packets.")
+        else:
+            print("Invalid filter. Exiting program.")
+            exit(1)
 
     if args.interface.lower() == "any":
         capture_on_all_interfaces(args.filter, args.count)
