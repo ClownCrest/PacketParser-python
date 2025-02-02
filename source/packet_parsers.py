@@ -34,7 +34,7 @@ def parse_ethernet_header(hex_data):
     else:
         print(f"  {'Unknown EtherType:':<27} {ether_type:<20} | {int(ether_type, 16)}")
         print("  No parser available for this EtherType.")
-    return ether_type, payload
+    #return ether_type, payload
 
 
 # Parse ARP header
