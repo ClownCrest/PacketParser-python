@@ -140,12 +140,10 @@ if __name__ == "__main__":
         exit(1)
 
     if not args.filter:
-        user_input = input("No filter provided. Please provide a filter (tcp, icmp, arp, udp) or press Enter to capture all packets: ")
-        if user_input.lower() in ['tcp', 'icmp', 'arp', 'udp']:
+        user_input = input("No filter provided. Please provide a filter (tcp, icmp, arp, udp) or press Enter to capture all packets: ").strip().lower()
+        if user_input in ['tcp', 'icmp', 'arp', 'udp']:
             args.filter = user_input
-        elif user_input == "":
-            print("Proceeding with capturing all packets.")
-        elif user_input.lower() in ['any', 'Any', 'None', 'none']:
+        elif user_input in ['', 'any', 'none']:
             print("Proceeding with capturing all packets.")
         else:
             print("Invalid filter. Exiting program.")

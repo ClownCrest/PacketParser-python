@@ -185,3 +185,37 @@ def parse_icmp_header(hex_data):
     print(f"{'-' * ((width - len('ICMP Payload')) // 2)}ICMP Payload{'-' * (90 - len('ICMP Payload') - ((width - len('ICMP Payload')) // 2))}")
     print(f"{wrapped_payload}")
     print("=" * width)
+    
+# Parse IPv6 header
+def parse_ipv6_header(hex_data):
+    version = int(hex_data[0:1], 16)
+    traffic_class = int(hex_data[1:3], 16)
+    flow_label = int(hex_data[3:8], 16)
+    payload_length = int(hex_data[8:12], 16)
+    next_header = int(hex_data[12:14], 16)
+    hop_limit = int(hex_data[14:16], 16)
+    source_ip = ':'.join(hex_data[i:i+4] for i in range(16, 48, 4))
+    destination_ip = ':'.join(hex_data[i:i+4] for i in range(48, 80, 4))
+
+    print(f"{'Parsing IPv6 Header'.center(width)}")
+    print("-" * width)
+    print(f"IPv6 Header:")
+    print(f"  {'Version':<25} {hex_data[0:1]:<20} | {version}")
+    print(f"  {'Traffic Class':<25} {hex_data[1:3]:<20} | {traffic_class}")
+    print(f"  {'Flow Label':<25} {hex_data[3:8]:<20} | {flow_label}")
+    print(f"  {'Payload Length':<25} {hex_data[8:12]:<20} | {payload_length}")
+    print(f"  {'Next Header':<25} {hex_data[12:14]:<20} | {next_header}")
+    print(f"  {'Hop Limit':<25} {hex_data[14:16]:<20} | {hop_limit}")
+    print(f"  {'Source IP':<25} {hex_data[16:48]:<20} | {source_ip}")
+    print(f"  {'Destination IP':<25} {hex_data[48:80]:<20} | {destination_ip}")
+
+    if next_header == 17:
+        parse_udp_header(hex_data[47:])
+    elif next_header == 6:
+        parse_tcp_header(hex_data[47:])
+    elif next_header == 58:
+        print("ICMPv6 Header")
+       # parse_icmpv6_header(hex_data[47:])
+    else:
+        print(f"  {'Unknown Next Header:':<25} {hex_data[11:13]:<20} | {next_header}")
+        print("  No parser available for this Next Header.")
