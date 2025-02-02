@@ -121,6 +121,8 @@ def capture_on_all_interfaces(capture_filter, packet_count):
 
 
 
+# ... (rest of the code remains the same until the main execution block)
+
 # Main execution with argparse
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Packet sniffer using Scapy with manual HEX parsing")
@@ -135,18 +137,26 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    allowed_filters = ["tcp", "icmp", "udp", "arp"]  # <--- Added allowed filters list
+
     if args.count < 0:
         print("Error: The packet count (-c) cannot be negative.")
         exit(1)
 
+    # Validate filter argument (new check added here)
+    if args.filter:
+        if args.filter.strip().lower() not in allowed_filters:
+            print(f"Error: Invalid filter '{args.filter}'. Allowed filters: {', '.join(allowed_filters)}.")
+            exit(1)
+
     if not args.filter:
         user_input = input("No filter provided. Please provide a filter (tcp, icmp, arp, udp) or press Enter to capture all packets: ").strip().lower()
-        if user_input in ['tcp', 'icmp', 'arp', 'udp']:
+        if user_input in allowed_filters:  # <--- Check against allowed_filters
             args.filter = user_input
         elif user_input in ['', 'any', 'none']:
             print("Proceeding with capturing all packets.")
         else:
-            print("Invalid filter. Exiting program.")
+            print(f"Error: Invalid filter '{user_input}'. Allowed filters: {', '.join(allowed_filters)}.")
             exit(1)
 
     if args.interface.lower() == "any":
