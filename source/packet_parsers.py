@@ -205,7 +205,7 @@ def parse_icmp_header(hex_data):
     print(f"{wrapped_payload}")
     print("=" * width)
 
-
+# Parse IPv6 header
 def parse_ipv6_header(hex_data):
     # Parse header fields
     version = int(hex_data[0], 16)
